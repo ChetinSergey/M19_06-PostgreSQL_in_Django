@@ -3,6 +3,9 @@ from django.http import HttpResponse
 from .forms import UserRegister
 from .models import *
 
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
+
 # Create your views here.
 
 
@@ -86,3 +89,17 @@ def sign_up_by_django(request):
             'form': form,
         }
         return render(request, 'registration_page.html', context)
+
+
+def post_list(request):
+    posts = Post.objects.all().order_by('-created_at')
+    paginator = Paginator(posts, 5)
+    page_number = request.GET.get('page')
+    try:
+        page_posts = paginator.get_page(page_number)
+    except PageNotAnInteger:
+        page_posts = paginator.page(1)
+    except EmptyPage:
+        page_posts = paginator.page(paginator.num_pages)
+
+    return render(request, 'post_list.html', {'page_posts': page_posts})
